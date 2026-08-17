@@ -1,10 +1,14 @@
-# Example dbt profile. Copy to ~/.dbt/profiles.yml and fill in via environment
-# variables - never commit a filled-in copy.
+# dbt connection profile. Copy it to where dbt looks for it:
 #
 #   cp rista_inventory_analytics/profiles.yml.example ~/.dbt/profiles.yml
 #
-# Every value is read from the environment so no credential ever lives in a
-# file that git can see. The variable names match .env.example.
+# Nothing here is a literal value - every field reads from the environment, so
+# the filled-in copy is still safe to look at and there is no credential to
+# accidentally commit. The variable names line up with .env.example.
+#
+# The profile name has to match `profile:` in dbt_project.yml, and the schema
+# set here is only a default: the bronze / silver / gold layers each override
+# it from the models: block in dbt_project.yml.
 
 rista_inventory_analytics:
   target: dev
@@ -17,11 +21,13 @@ rista_inventory_analytics:
       password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
       role: "{{ env_var('SNOWFLAKE_ROLE') }}"              # e.g. TRANSFORMER
       warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"    # e.g. TRANSFORM_WH
-      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"      # target db for built models
-      schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"          # default schema; layers override to BRONZE/SILVER/GOLD
+      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
       threads: 8
       client_session_keep_alive: false
 
+    # Same connection, different auth. Scheduled runs have nobody around to
+    # type a password, and a key can be rotated without touching the user.
     prod:
       type: snowflake
       account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
@@ -32,8 +38,6 @@ rista_inventory_analytics:
       schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
       threads: 8
 
-      # Key-pair auth is preferred for scheduled/service runs - no interactive
-      # password, and the key can be rotated independently of the user.
-      # Swap the password line above for these two:
+      # Use these instead of `password:` - not alongside it.
       private_key_path: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PATH') }}"
       private_key_passphrase: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PASSPHRASE') }}"
