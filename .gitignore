@@ -1,0 +1,77 @@
+# ---- Secrets and credentials -------------------------------------------
+.env
+.env.*
+!.env.example
+*_env
+_env
+.envrc
+
+# dbt profiles (the .example file is the only one that may be committed)
+profiles.yml
+**/profiles.yml
+!**/profiles.yml.example
+.dbt/
+
+# Service accounts, keys, certificates
+*.json
+service-account*.json
+*credentials*.json
+*.pem
+*.p8
+*.key
+*.pfx
+*.p12
+*.jks
+*.keystore
+id_rsa*
+*.ppk
+
+# Cloud CLI / SDK state
+.azure/
+.aws/
+.gcloud/
+
+# ---- Python -------------------------------------------------------------
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# ---- dbt ----------------------------------------------------------------
+target/
+dbt_packages/
+dbt_modules/
+logs/
+.user.yml
+
+# ---- Airflow ------------------------------------------------------------
+airflow.db
+airflow.cfg
+airflow-webserver.pid
+standalone_admin_password.txt
+
+# ---- Data files (never commit extracts) --------------------------------
+*.parquet
+*.csv
+*.xlsx
+*.xls
+*.db
+*.sqlite3
+
+# ---- Editors and OS ----------------------------------------------------
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: slv_ibac_resolved
+    description: >
+      Master-joined item balance with 7/28-day average daily consumption.
+      Master tables are deduped to one row per join key before joining, to
+      prevent fan-out from inflating the fact measures.
+    columns:
+      - name: '"ADC_7_Days"'
+        description: "Trailing 7-observation average of daily consumption, per store + item."
+      - name: '"ADC_28_Days"'
+        description: "Trailing 28-observation average of daily consumption, per store + item."
+
+  - name: slv_ibac_main
+    description: >
+      Deduped, key-built item balance and the single source the gold layer
+      reads. Grain: one row per Date + Store + Product + SKU.
+    tests:
+      # The grain contract. If this fails, a master table has started fanning
+      # out or the bronze dedupe let a duplicate through - fix upstream rather
+      # than adding another DISTINCT here.
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - DATE_KEY
+            - STORE_KEY
+            - PRODUCT_KEY
+            - "SKU"
+    columns:
+      - name: DATE_KEY
+        description: "Business date as YYYYMMDD integer."
+        tests: [not_null]
+      - name: STORE_KEY
+        description: "Surrogate key: abs(hash(upper(trim(store name))))."
+        tests: [not_null]
+      - name: PRODUCT_KEY
+        description: "Surrogate key: abs(hash(upper(trim(item name))))."
+        tests: [not_null]

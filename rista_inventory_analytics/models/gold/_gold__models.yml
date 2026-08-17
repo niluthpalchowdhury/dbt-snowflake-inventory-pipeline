@@ -1,0 +1,51 @@
+version: 2
+
+models:
+  - name: fct_item_balance
+    description: >
+      Fact table of daily inventory position and movement per store and item.
+      Grain: one row per Date + Store + Product + SKU, inherited from
+      slv_ibac_main. Measures cover opening/closing balance and cost, and every
+      activity type (sales, purchase, transfers, shrinkage, audit variance).
+    columns:
+      - name: DATE_KEY
+        description: "FK to dim_date."
+        tests: [not_null]
+      - name: STORE_KEY
+        description: "FK to dim_store."
+        tests: [not_null]
+      - name: PRODUCT_KEY
+        description: "FK to dim_product."
+        tests: [not_null]
+
+  - name: dim_date
+    description: "Date dimension derived from the dates present in the fact."
+    columns:
+      - name: DATE_KEY
+        description: "YYYYMMDD as string."
+        tests: [not_null]
+
+  - name: dim_store
+    description: "Store dimension: region, outlet type, and field/area coach ownership."
+    columns:
+      - name: STORE_KEY
+        tests: [not_null]
+
+  - name: dim_product
+    description: "Product dimension keyed on the normalised item name."
+    columns:
+      - name: PRODUCT_KEY
+        tests: [not_null]
+
+  - name: inventory_summary_last_2yrs
+    description: >
+      Wide BI mart over a rolling window. Adds days-of-cover, suggested indent
+      quantity, freezer space utilisation, and a Critical/Normal/Excess stock
+      health band. Policy thresholds come from vars in dbt_project.yml.
+    columns:
+      - name: '"Stock Left (in Days)"'
+        description: "Closing balance divided by rounded 7-day average daily consumption."
+      - name: SI
+        description: "Suggested indent quantity to reach the region's target days of cover. Zero when already well covered."
+      - name: EXCESS
+        description: "Stock health band: Critical, Normal, or Excess. NULL for regions with no configured policy."

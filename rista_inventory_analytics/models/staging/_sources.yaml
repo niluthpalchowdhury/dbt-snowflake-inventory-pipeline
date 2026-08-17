@@ -1,0 +1,40 @@
+version: 2
+
+sources:
+  - name: rista_raw
+    description: >
+      Raw landing zone. Snowpipe copies each Parquet partition from Blob
+      Storage into a single VARIANT column, plus ingestion metadata. Nothing
+      is typed or renamed here - that is the bronze layer's job.
+    database: "{{ var('raw_database') }}"
+    schema: "{{ var('raw_schema') }}"
+    tables:
+      - name: ITEM_BALANCE_WITH_ACTIVITY_AND_COST_RAW
+        description: "One row per Parquet record. PARQUET holds the payload; _SOURCE_FILE / _LOAD_DT / _INGESTED_AT are stamped at COPY time."
+        config:
+          loaded_at_field: _ingested_at
+          # The extract runs daily, so a gap beyond ~26h means a missed run.
+          freshness:
+            warn_after: {count: 26, period: hour}
+            error_after: {count: 30, period: hour}
+
+  - name: masters
+    description: >
+      Business master data maintained outside this pipeline (outlet attributes,
+      item categorisation, freezer capacity, indent cycles). These arrive from
+      operational spreadsheets, so they are not assumed to be clean or unique.
+    database: "{{ var('master_database') }}"
+    schema: "{{ var('master_schema') }}"
+    tables:
+      - name: STG_OUTLET_CATEGORY
+        description: "Outlet to region mapping."
+      - name: STG_ITEM_CATEGORY
+        description: "Item criticality, frozen/ambient flag, case size."
+      - name: STG_CHEST_FREEZER_DATA
+        description: "Per-item frozen volume for one unit, in litres."
+      - name: STG_FREEZER_CAPACITY_DATA
+        description: "Per-outlet available freezer capacity, in litres."
+      - name: STG_STORE_MASTER_DATA
+        description: "Outlet master: type, city, state, field/area coach. Not unique on outlet name - deduped in silver."
+      - name: INDENT_CYCLE_DATA
+        description: "Per-outlet replenishment cycle length and last indent date."

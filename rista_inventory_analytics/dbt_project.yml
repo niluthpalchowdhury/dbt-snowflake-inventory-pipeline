@@ -1,0 +1,60 @@
+name: 'rista_inventory_analytics'
+version: '1.0.0'
+
+profile: 'rista_inventory_analytics'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+vars:
+  # ---------------------------------------------------------------
+  # Source locations. Kept as vars so the same project can be
+  # pointed at dev / staging / prod without editing model code.
+  # ---------------------------------------------------------------
+  raw_database: RAW_DB
+  raw_schema: RISTA
+  master_database: ANALYTICS_DB
+  master_schema: MASTER_STAGING
+
+  # ---------------------------------------------------------------
+  # Replenishment policy.
+  #
+  # NOTE: these values are ILLUSTRATIVE PLACEHOLDERS, not a real
+  # service-level policy. "Cover days" = closing balance / 7-day
+  # average daily consumption, i.e. how many days of stock is on hand.
+  #
+  # Central locations replenish on a short cycle, so they run leaner.
+  # Remote locations replenish infrequently and must hold more cover.
+  # ---------------------------------------------------------------
+  central_regions: ['Central Warehouse', 'Metro Region']
+  remote_region: 'Remote Region'
+
+  central_critical_cover_days: 5     # at or below -> Critical
+  central_excess_cover_days: 25      # at or above -> Excess
+  central_target_cover_days: 25      # cover days the suggested indent aims for
+  central_si_skip_cover_days: 15     # above this, suggest nothing
+
+  remote_critical_cover_days: 10
+  remote_excess_cover_days: 50
+  remote_target_cover_days: 50
+  remote_si_skip_cover_days: 45
+
+  # Rolling window for the reporting mart.
+  summary_lookback_years: 2
+
+models:
+  rista_inventory_analytics:
+    bronze:
+      +schema: BRONZE
+    silver:
+      +schema: SILVER
+    gold:
+      +schema: GOLD

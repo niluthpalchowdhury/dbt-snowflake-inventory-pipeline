@@ -1,0 +1,27 @@
+# ─────────────────────────────────────────────
+# Extract / load pipeline (main.py)
+# ─────────────────────────────────────────────
+pandas>=2.0
+numpy>=1.24
+pyarrow>=14.0
+requests>=2.31
+urllib3>=2.0
+PyJWT>=2.8
+python-dotenv>=1.0
+
+# Azure Blob Storage
+azure-storage-blob>=12.19
+azure-core>=1.30
+
+# ─────────────────────────────────────────────
+# Transformation layer (dbt)
+# ─────────────────────────────────────────────
+dbt-snowflake>=1.7
+
+# ─────────────────────────────────────────────
+# Orchestration
+# ─────────────────────────────────────────────
+# Airflow is intentionally not pinned here. Install it separately in the
+# scheduler environment using the constraints file for your Python version:
+#   pip install "apache-airflow==2.9.3" \
+#     --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.9.3/constraints-3.11.txt"
